@@ -22,7 +22,7 @@ public class FileScan extends Iterator {
     //throw new UnsupportedOperationException("Not implemented");
     this.schema = schema;//schema shouldnt need to be manually copied, wont be destructed either 
     this.file = file;
-    hScan = new HeapScan(file);
+    hScan = file.openScan();
     open = true;
     curRid = new RID();
     //or 
@@ -44,8 +44,8 @@ public class FileScan extends Iterator {
    */
   public void restart() {
     //throw new UnsupportedOperationException("Not implemented");
-    hScan.finalize();
-    hScan = new HeapScan(file);
+    hScan.close();
+    hScan = file.openScan();
   }
 
   /**
@@ -62,7 +62,7 @@ public class FileScan extends Iterator {
   public void close() {
     //throw new UnsupportedOperationException("Not implemented");
    // try {
-    	hScan.finalize();
+    	hScan.close();
    // }catch (Exception e){ 
     open = false;
   }
