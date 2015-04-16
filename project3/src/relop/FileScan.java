@@ -46,6 +46,8 @@ public class FileScan extends Iterator {
     //throw new UnsupportedOperationException("Not implemented");
     hScan.close();
     hScan = file.openScan();
+    curRid = new RID();
+    open = true;
   }
 
   /**
