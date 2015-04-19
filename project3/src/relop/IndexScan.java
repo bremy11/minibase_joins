@@ -93,8 +93,7 @@ public class IndexScan extends Iterator {
 		byte[] outBytes;
 		try{
 			curRid.copyRID(this.bScan.getNext());
-			outBytes = new byte[curRid.getLength()];
-			curRid.writeData(outBytes, (short) 0);
+			outBytes = this.file.selectRecord(curRid);
 			//outBytes = this.bScan.getNext(curRid);
 		}catch (IllegalStateException e){
 			throw new IllegalStateException();
