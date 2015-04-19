@@ -17,6 +17,7 @@ public class Selection extends Iterator {
    
   public Selection(Iterator iter, Predicate... preds) {
     //throw new UnsupportedOperationException("Not implemented");
+    super.schema = iter.schema;       
     this.open = true;
     this.iter = iter; 	//is there a better way to copy the itterator?????
     iter.restart();
@@ -78,13 +79,14 @@ public class Selection extends Iterator {
 		while (iter.hasNext()){
 			try{
 				t = this.iter.getNext();
-				
+				//t.print();
 				//outBytes = this.bScan.getNext(curRid);
 			}catch (IllegalStateException e){
 				throw new IllegalStateException();
 			}
 			for( int i = 0; i < preds.length; i++)
 			{
+        /*                THIS ASSUMES YOU ARE DOING AN "AND"
 				if (!preds[i].evaluate(t))
 				{
 					break;		//exit for loop
@@ -92,7 +94,11 @@ public class Selection extends Iterator {
 				if (i == preds.length-1)		//we got past last predicate
 				{
 					return t;
-				}
+				}*/
+        if (preds[i].evaluate(t))
+        {
+          return t;    //exit for loop
+        }
 			}
 		}
 	}else{

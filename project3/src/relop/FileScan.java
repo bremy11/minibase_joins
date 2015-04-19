@@ -21,6 +21,7 @@ public class FileScan extends Iterator {
   public FileScan(Schema schema, HeapFile file) {
     //throw new UnsupportedOperationException("Not implemented");
     this.schema = schema;//schema shouldnt need to be manually copied, wont be destructed either 
+    super.schema = schema;
     this.file = file;
     hScan = file.openScan();
     open = true;

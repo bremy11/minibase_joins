@@ -12,11 +12,23 @@ public class Projection extends Iterator {
   Iterator iter;
   Integer[] fields; 
   boolean open;
+  Schema s;               //output schema
   public Projection(Iterator iter, Integer... fields) {
     //throw new UnsupportedOperationException("Not implemented");
+    super.schema = iter.schema;
     this.iter = iter;
     this.fields = fields;
- 	open = true;
+ 	  open = true;
+    //s = null;
+    
+
+    s = new Schema(fields.length);
+    for( int i = 0; i < fields.length; i++)     //create new schema
+    {
+     s.initField(i, iter.schema, fields[i]);
+    }
+    super.schema = s;
+      
     //System.arraycopy( fields, 0, this.fields, 0, fields.length );
   }
 
@@ -70,6 +82,8 @@ public class Projection extends Iterator {
   public Tuple getNext() {
     //throw new UnsupportedOperationException("Not implemented");
      Tuple t;
+     
+     Tuple out;
      if (open){
 		while (iter.hasNext()){
 			try{
@@ -79,10 +93,13 @@ public class Projection extends Iterator {
 			}catch (IllegalStateException e){
 				throw new IllegalStateException();
 			}
-			for( int i = 0; i < fields.length; i++)			//CHANGE IN HERE, do I need to construct new schema?
-			{
-				
-			}
+
+      out = new Tuple(s);
+      for( int i = 0; i < fields.length; i++)     //construct new tuple
+      {
+       out.setField(i, t.getField(fields[i]));
+      }
+      return out;
 		}
 	}else{
 		throw new IllegalStateException("iterator is closed");

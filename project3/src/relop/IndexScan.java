@@ -23,6 +23,7 @@ public class IndexScan extends Iterator {
   public IndexScan(Schema schema, HashIndex index, HeapFile file) {
     //throw new UnsupportedOperationException("Not implemented");
     this.schema = schema;//schema shouldnt need to be manually copied, wont be destructed either 
+    super.schema = schema;
     this.file = file;
     //index = new HashIndex(file.toString());			//do I need to initialize here?
     this.index = index;
@@ -107,7 +108,8 @@ public class IndexScan extends Iterator {
    * Gets the key of the last tuple returned.
    */
   public SearchKey getLastKey() {
-    throw new UnsupportedOperationException("Not implemented");
+    //throw new UnsupportedOperationException("Not implemented");
+    return bScan.getLastKey();
   }
 
   /**
@@ -115,7 +117,8 @@ public class IndexScan extends Iterator {
    * number of buckets if none.
    */
   public int getNextHash() {
-    throw new UnsupportedOperationException("Not implemented");
+    //throw new UnsupportedOperationException("Not implemented");
+    return bScan.getNextHash();
   }
 
 } // public class IndexScan extends Iterator

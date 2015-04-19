@@ -8,7 +8,7 @@ import index.HashScan;
 /**
  * Wrapper for hash scan, an index access method.
  */
-public class KeyScan extends Iterator {			///I AM USING BUCKET SCAN, CHANGE TO HEAP SCAN
+public class KeyScan extends Iterator {	
 
   /**
    * Constructs an index scan, given the hash index and schema.
@@ -23,7 +23,14 @@ public class KeyScan extends Iterator {			///I AM USING BUCKET SCAN, CHANGE TO H
 	
   public KeyScan(Schema schema, HashIndex index, SearchKey key, HeapFile file) {
     //throw new UnsupportedOperationException("Not implemented");
+    if( schema ==null || index ==null || key ==null|| file==null){
+      throw new UnsupportedOperationException("NULL arguments");
+    }
+
     this.schema = schema;//schema shouldnt need to be manually copied, wont be destructed either 
+    //this.schema = schema.clone();
+    super.schema = schema;                    //need to add super for the interator abstract class to inherit the value
+    //schema.print();
     this.file = file;
     //index = new HashIndex(file.toString());			//do I need to initialize here?
     this.index = index;
@@ -47,7 +54,7 @@ public class KeyScan extends Iterator {			///I AM USING BUCKET SCAN, CHANGE TO H
    */
   public void restart() {
     //throw new UnsupportedOperationException("Not implemented");
-        hScan.close();
+      hScan.close();
     	hScan = index.openScan(this.key);
     	this.curRid = new RID();
     	open = true;
@@ -88,20 +95,25 @@ public class KeyScan extends Iterator {			///I AM USING BUCKET SCAN, CHANGE TO H
    * 
    * @throws IllegalStateException if no more tuples
    */
-  public Tuple getNext() {
+  public Tuple getNext() {            //CHECK FOR SEARCH KEY!!!!
     //throw new UnsupportedOperationException("Not implemented");
     if (open){
-		byte[] outBytes;
-		try{
-			curRid.copyRID(this.hScan.getNext());
-			outBytes = new byte[curRid.getLength()];
-			curRid.writeData(outBytes, (short) 0);
-			//outBytes = this.bScan.getNext(curRid);
-		}catch (IllegalStateException e){
-			throw new IllegalStateException();
-		}
-		return new Tuple(this.schema, outBytes);
-	}
+  		byte[] outBytes;
+  		try{
+  			curRid.copyRID(this.hScan.getNext());
+        outBytes = this.file.selectRecord(curRid);
+  			//outBytes = new byte[curRid.getLength()];
+  			//curRid.writeData(outBytes, (short) 0);
+        //System.out.println(outBytes);
+  			//outBytes = this.bScan.getNext(curRid);
+  		}catch (IllegalStateException e){
+  			throw new IllegalStateException();
+  		}
+  		Tuple t =  new Tuple(this.schema, outBytes);
+      //System.out.println(curRid.toString());
+      //t.print();
+      return t;
+  	}
     return null;	//???????????????????			or throw IllegalStateException?
   }
 } // public class KeyScan extends Iterator
