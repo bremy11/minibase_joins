@@ -15,16 +15,21 @@ public class SimpleJoin extends Iterator {
    Predicate[] preds;
    boolean open;
    Schema joinSchema;
-
+	Tuple l = null;
+    Tuple r = null;
+    boolean hasnext;
+   Tuple cur = null; 
+   
   public SimpleJoin(Iterator left, Iterator right, Predicate... preds) {
     //throw new UnsupportedOperationException("Not implemented");
     this.left = left;
     this.right = right;
     this.preds = preds;
     open = true;
-
+	hasnext = true;
     joinSchema = Schema.join(left.schema, right.schema);
     super.schema = joinSchema;
+    this.setupNext();
   }
 
   /**
@@ -43,7 +48,10 @@ public class SimpleJoin extends Iterator {
     //throw new UnsupportedOperationException("Not implemented");
     right.restart();
     left.restart();
+    l = left.getNext();
+    r = right.getNext();
     open = true;
+    hasnext = true;
   }
 
   /**
@@ -69,7 +77,7 @@ public class SimpleJoin extends Iterator {
    */
   public boolean hasNext() {
     //throw new UnsupportedOperationException("Not implemented");
-    return left.hasNext();
+    return hasnext;
   }
 
   /**
@@ -77,54 +85,98 @@ public class SimpleJoin extends Iterator {
    * 
    * @throws IllegalStateException if no more tuples
    */
+   public void setupNext(){
+   
+    Tuple out;
+    if ( !left.isOpen() || !right.isOpen()){
+    	throw new IllegalStateException("iterator is closed");
+    }	
+    if (l == null)
+    {
+    	//left.restart();
+    	
+    		l = left.getNext();
+    }
+    if (r == null){
+   		//System.out.println("HERE121!!!!");
+    	//right.restart();
+    	r = right.getNext();
+    }
+	boolean lcont;
+	boolean rcont;
+    if (open){
+  		do{
+  			do{
+          		out = Tuple.join(l,r, joinSchema);
+  				for( int i = 0; i < preds.length; i++)
+  				{
+				    if (preds[i].evaluate(out) )
+				    {
+				    	if (right.hasNext()){
+				    		r = right.getNext();
+				    		hasnext = true;
+				    	}else{
+				    		hasnext = false;
+				    	}
+				      	cur = out;    //exit for loop
+				      	//System.out.println();
+				      	//out.print();
+				      	//System.out.println();
+				      	
+				      	return;
+				    }
+  				}
+  				rcont = right.hasNext();
+  				if (rcont){
+	  				try{
+						r = right.getNext();
+					//outBytes = this.bScan.getNext(curRid);
+	  				}catch (IllegalStateException e){
+	  					throw new IllegalStateException("get next on right failed");
+	  				}
+  				}
+  			}while (rcont);
+  			right.restart();
+  			lcont = left.hasNext();
+  			if (lcont){
+  				try{
+  					l = left.getNext();
+  				}catch (IllegalStateException e){
+  					throw new IllegalStateException("get next on left failed");
+  				} 
+  			}
+  			//System.out.println("l: "+l);
+  		}while (lcont);
+  	}else{
+  		throw new IllegalStateException("iterator is closed");
+  	}
+  	hasnext = false;
+}
+   
+   
+   
   public Tuple getNext() 
   {
     //throw new UnsupportedOperationException("Not implemented");
-    Tuple l;
-    Tuple r;
     Tuple out;
     if (open){
-      
-  		while (left.hasNext())
-      {
-  			l = left.getNext();
-  			while (right.hasNext()){
-  				
-  				try{
-  					r = right.getNext();
-  				
-  					//outBytes = this.bScan.getNext(curRid);
-  				}catch (IllegalStateException e){
-  					throw new IllegalStateException();
-  				}
-          out = Tuple.join(l,r, joinSchema);
-  				for( int i = 0; i < preds.length; i++)
-  				{
+    	out = cur;
+    	this.setupNext();
+    	return out;
+    }
+	throw new IllegalStateException("no more tuples");
+} // public class SimpleJoin extends Iterator
+}
 
             /*
+
   					if (!preds[i].evaluate(l) || !preds[i].evaluate(r))
   					{
   						break;		//exit for loop
   					}
   					if (i == preds.length-1)		//we got past last predicate
   					{
+
               
   						return Tuple.join(l,r, joinSchema);			//add schema for join
   					}*/
-            if (preds[i].evaluate(out) )
-            {
-              return out;    //exit for loop
-            }
-
-  				}
-  			}
-  			right.restart();
-  		}
-  	}else{
-  		throw new IllegalStateException("iterator is closed");
-  	}
-  	throw new IllegalStateException("no more tuples");
-  }
-
-} // public class SimpleJoin extends Iterator
-
