@@ -211,6 +211,11 @@ class ROTest extends TestDriver {
 			tuple.insertIntoFile(drivers);
 			tuple.setAllFields(3, "Christopher", "Clifton", 18F, 4);
 			tuple.insertIntoFile(drivers);
+            
+            tuple.setAllFields(3, "Chrostopher", "Clifton", 18F, 4);
+			tuple.insertIntoFile(drivers);
+            
+            
 			tuple.setAllFields(4, "Sunil", "Prabhakar", 22F, 7);
 			tuple.insertIntoFile(drivers);
 			tuple.setAllFields(5, "Elisa", "Bertino", 26F, 5);
