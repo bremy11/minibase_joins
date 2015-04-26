@@ -23,4 +23,4 @@ xx:
 	jar tf $(LIBPATH)
 
 clean:
-	\rm -f *.class *~ \#* core TRACE
+	\rm -f *.class *.minibase *~ \#* core TRACE
