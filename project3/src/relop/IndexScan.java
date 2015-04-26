@@ -13,12 +13,12 @@ public class IndexScan extends Iterator {
   /**
    * Constructs an index scan, given the hash index and schema.
    */
-   HeapFile file;
+   public HeapFile file;
    Schema schema;
    BucketScan bScan;
-   HashIndex index;
+   public HashIndex index;
    boolean open;
-	RID curRid;
+    public RID curRid;
 	
   public IndexScan(Schema schema, HashIndex index, HeapFile file) {
     //throw new UnsupportedOperationException("Not implemented");
@@ -92,6 +92,7 @@ public class IndexScan extends Iterator {
     if (open){
 		byte[] outBytes;
 		try{
+            curRid = new RID();
 			curRid.copyRID(this.bScan.getNext());
 			outBytes = this.file.selectRecord(curRid);
 			//outBytes = this.bScan.getNext(curRid);

@@ -31,6 +31,10 @@ public class HashJoin extends Iterator
     Iterator right;
     Integer lcol;
     Integer rcol;
+    boolean lfilescan = false;
+    boolean rfilescan = false;
+    boolean lindexscan = false;
+    boolean rindexscan = false;
     
 	boolean isOpen;
     LinkedList<TEntry> lpartitions[];
@@ -54,13 +58,29 @@ public class HashJoin extends Iterator
         this.lcol = lcol;
         this.rcol = rcol;
 		schema = Schema.join(left.schema, right.schema);
+        lfilescan = left instanceof FileScan;
+        rfilescan = right instanceof FileScan;
+        lindexscan = left instanceof IndexScan;
+        rindexscan = right instanceof IndexScan;
         
         lpartitions = new LinkedList[K];
         rpartitions = new LinkedList[K];
-        lheap = new HeapFile(null);
-        rheap = new HeapFile(null);
         
-        //can optimize when given certain iterator types?
+        if(lindexscan){
+            lheap = ((IndexScan) left).file;
+        }else if(lfilescan){
+            lheap = ((FileScan) left).file;
+        }else{
+            lheap = new HeapFile(null); 
+        }
+        
+        if(rindexscan){
+            rheap = ((IndexScan) right).file;
+        }else if(rfilescan){
+            rheap = ((FileScan) right).file;
+        }else{
+            rheap = new HeapFile(null); 
+        }
         
         for(int i = 0; i < K; i++)
         {
@@ -71,7 +91,16 @@ public class HashJoin extends Iterator
         while(left.hasNext())
         {
             Tuple l = left.getNext();
-            RID rid = lheap.insertRecord(l.getData());
+            RID rid;
+            
+            if(lindexscan){
+                rid = ((IndexScan) left).curRid;
+            }else if(lfilescan){
+                rid = ((FileScan) left).getLastRID();
+            }else{
+                rid = lheap.insertRecord(l.getData());
+            }
+            
             int lhashcode = getHash(l.getField(lcol));
             lpartitions[lhashcode].addLast(new TEntry(l.getField(lcol), rid));
         }
@@ -79,7 +108,16 @@ public class HashJoin extends Iterator
         while(right.hasNext())
         {
             Tuple r = right.getNext();
-            RID rid = rheap.insertRecord(r.getData());
+            RID rid;
+            
+            if(rindexscan){
+                rid = ((IndexScan) right).curRid;
+            }else if(rfilescan){
+                rid = ((FileScan) right).getLastRID();
+            }else{
+                rid = rheap.insertRecord(r.getData());
+            }
+            
             int rhashcode = getHash(r.getField(rcol));
             rpartitions[rhashcode].addLast(new TEntry(r.getField(rcol), rid));
         }

@@ -13,7 +13,7 @@ public class FileScan extends Iterator {
   /**
    * Constructs a file scan, given the schema and heap file.
    */
-   HeapFile file;
+   public HeapFile file;
    Schema schema;
    HeapScan hScan;
    boolean open;
@@ -91,6 +91,7 @@ public class FileScan extends Iterator {
     if (open){
 		byte[] outBytes;
 		try{
+            curRid = new RID();
 			outBytes = this.hScan.getNext(curRid);
 		}catch (IllegalStateException e){
 			throw new IllegalStateException();
