@@ -99,9 +99,9 @@ Test 2 completed without exception.
 --------------------------------------
         Reads   Writes  Allocs  Pinned
 --------------------------------------
-drivers 0       3       2       0
+drivers 0       3       -2      0
 rides   0       3       2       0
-h_join  0       4       2       0
+h_join  0       0       0       1
 --------------------------------------
 
 
@@ -135,9 +135,9 @@ Test 3 completed without exception.
         Reads   Writes  Allocs  Pinned
 --------------------------------------
 drivers 1949    2161    248     0
-rides   0       67      66      0
+rides   2       68      66      0
 groups  0       6       5       0
-query   2368    300     286     1
+query   1274    102     96      0
 --------------------------------------
 
 
