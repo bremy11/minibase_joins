@@ -66,6 +66,7 @@ public abstract class Iterator {
     int cnt = 0;
     schema.print();
     while (hasNext()) {
+        
       getNext().print();
       cnt++;
     }

@@ -85,7 +85,7 @@ public class Projection extends Iterator {
      
      Tuple out;
      if (open){
-		while (iter.hasNext()){
+		while (iter.hasNext()){ //while loop was unnecessary, but I'm going to leave it alone
 			try{
 				t = this.iter.getNext();
 				

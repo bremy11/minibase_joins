@@ -52,6 +52,8 @@ public class SimpleJoin extends Iterator {
     r = right.getNext();
     open = true;
     hasnext = true;
+    cur = null;
+    this.setupNext();
   }
 
   /**
@@ -160,23 +162,14 @@ public class SimpleJoin extends Iterator {
     //throw new UnsupportedOperationException("Not implemented");
     Tuple out;
     if (open){
-    	out = cur;
-    	this.setupNext();
-    	return out;
-    }
+        if(hasNext()){
+            out = cur;
+            this.setupNext();
+            return out;
+        }
+    }else{
+		throw new IllegalStateException("iterator is closed");
+	}
 	throw new IllegalStateException("no more tuples");
 } // public class SimpleJoin extends Iterator
 }
-
-            /*
-
-  					if (!preds[i].evaluate(l) || !preds[i].evaluate(r))
-  					{
-  						break;		//exit for loop
-  					}
-  					if (i == preds.length-1)		//we got past last predicate
-  					{
-
-              
-  						return Tuple.join(l,r, joinSchema);			//add schema for join
-  					}*/

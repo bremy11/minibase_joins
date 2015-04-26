@@ -14,6 +14,7 @@ public class Selection extends Iterator {
    boolean open;
    Iterator iter;
    Predicate[] preds;
+   Tuple cur = null;
    
   public Selection(Iterator iter, Predicate... preds) {
     //throw new UnsupportedOperationException("Not implemented");
@@ -22,6 +23,7 @@ public class Selection extends Iterator {
     this.iter = iter; 	//is there a better way to copy the itterator?????
     iter.restart();
     this.preds = preds;
+    this.setupNext();
   }
 
   /**
@@ -40,6 +42,8 @@ public class Selection extends Iterator {
     //throw new UnsupportedOperationException("Not implemented");
     iter.restart();
     open = true;
+    cur = null;
+    this.setupNext();
   }
 
   /**
@@ -64,8 +68,32 @@ public class Selection extends Iterator {
    */
   public boolean hasNext() {
     //throw new UnsupportedOperationException("Not implemented");
-     return iter.hasNext();
+     return cur != null;
   }
+  
+    private void setupNext() {
+        Tuple t;
+        
+        while (iter.hasNext()){
+            try{
+                t = this.iter.getNext();
+                //t.print();
+                //outBytes = this.bScan.getNext(curRid);
+            }catch (IllegalStateException e){
+                throw new IllegalStateException();
+            }
+            for(int i = 0; i < preds.length; i++)
+            {
+                if (preds[i].evaluate(t))
+                {
+                    cur = t; //exit for loop
+                    return;
+                }
+            }
+        }
+        
+        cur = null;
+    }
 
   /**
    * Gets the next tuple in the iteration.
@@ -76,31 +104,12 @@ public class Selection extends Iterator {
     //throw new UnsupportedOperationException("Not implemented");
     Tuple t;
     if (open){
-		while (iter.hasNext()){
-			try{
-				t = this.iter.getNext();
-				//t.print();
-				//outBytes = this.bScan.getNext(curRid);
-			}catch (IllegalStateException e){
-				throw new IllegalStateException();
-			}
-			for( int i = 0; i < preds.length; i++)
-			{
-        /*                THIS ASSUMES YOU ARE DOING AN "AND"
-				if (!preds[i].evaluate(t))
-				{
-					break;		//exit for loop
-				}
-				if (i == preds.length-1)		//we got past last predicate
-				{
-					return t;
-				}*/
-        if (preds[i].evaluate(t))
+        if(hasNext())
         {
-          return t;    //exit for loop
+            Tuple out = cur;
+            this.setupNext();
+            return out;
         }
-			}
-		}
 	}else{
 		throw new IllegalStateException("iterator is closed");
 	}
